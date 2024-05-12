@@ -1,0 +1,472 @@
+package AnalizadorSintactico;
+import java.util.ArrayList;
+import java.util.List;
+import AnalizadorLexico.*;
+
+import java_cup.runtime.*;
+
+
+parser code {:
+    // Connect this parser to a scanner!
+  public AnalizadorSintactico(analizadorLexico lex) {
+	    super(lex);
+	  }
+
+
+
+
+
+String Errores;
+
+public void syntax_error(Symbol cur_token) {
+    StringBuilder error = new StringBuilder();
+    error.append("ERROR SINTACTICO EN : ").append(symbl_name_from_id(cur_token.sym)).append("\n");
+    error.append("Linea ").append(cur_token.left).append("\n");
+    error.append("Columna ").append(cur_token.right).append("\n");
+    if (cur_token.value != null) {
+            error.append("Lexema: ").append(cur_token.value).append("\n");
+        }
+
+
+
+Errores=error.toString();
+    System.out.println(error.toString());
+}
+
+
+
+
+
+
+
+
+/*
+public void unrecovered_syntax_error(Symbol cur_token) {
+            System.out.println("Error irrecuperable sobrecargado");
+        }*/
+:}
+
+/* Terminals (tokens returned by the scanner). */
+terminal        TITLE, DESCRIPTION, KEYWORDS, HEADER, FOOTER, BACKGROUND_COLOR, FONT_FAMILY,
+                FONT_SIZE, DATA, CATEGORY, VALUE, COLOR, CHART, X_AXIS_LABEL, Y_AXIS_LABEL,
+                LEGEND_POSITION, X, Y, SIZE, NAME, POINTS, LINE_STYLE, SOLID, DASHED, LABEL,
+                ICON, LINK, IF, ELSE, FOR, WHILE, DO, ASTERISCO, COMA, PUNTO_COMA, DOS_PUNTOS,
+                PARENTESIS_A, PARENTESIS_C, LLAVE_A, LLAVE_C, CORCHETE_A, CORCHETE_C, BARRA,
+                MENOR_IGUAL, MAYOR_IGUAL, DIFERENTE, IGUAL, IGUAL_IGUAL, MENOR_QUE, MAYOR_QUE,
+                MAS, MENOS, IDENTIFICADOR, HEXADECIMAL, CONSTANTE, COMILLA, CADENA, TRUE, FALSE
+
+                ;
+
+
+/* Non-terminals */
+//no terminales
+non terminal   inicio, campos, lista_campos, grafica, grafica_barras, grafica_barra_simple, mas_category_simple, grafica_barras_extendida,
+               mas_category_extendida, grafia_pastel, grafica_pastel_simple, grafica_pastel_extendido, mas_label, mas_label_extendido,
+               grafica_puntos, grafica_puntos_simple, grafica_puntos_expandida, mas_coordenadas_simples, mas_coordenadas_expandidas,
+               grafica_lineas_simple, grafica_lineas_expandida, series_simples, series_expandidas, grafica_lineas, mas_coordenadas_label,
+               tarjeta_informacion_simple, tarjeta_informacion_extendida, tarjeta_informacion, asigancion, valor, operacion, condicion_if,
+               condicion, booolean, comparador, bucle_for, condicional_for, constate_identificador, incremento_decremento, bucle_while,
+               bucle_do_while, codigo, asignaciones, graficas, contenido, operaciones, estructura_control, estructuras_control,
+               operador_artimetico, asignacion_compuesta, asignacion_operacion, asignacion_operacion_id, lista_instrucciones, instruccion
+
+
+
+
+
+
+
+   ;
+
+
+
+/* GRAMATICA */
+
+
+
+
+
+start with inicio;
+
+inicio ::= LLAVE_A
+           TITLE DOS_PUNTOS CADENA COMA
+           DESCRIPTION DOS_PUNTOS CADENA COMA
+           KEYWORDS DOS_PUNTOS CORCHETE_A campos  CORCHETE_C COMA
+           HEADER DOS_PUNTOS LLAVE_A  TITLE DOS_PUNTOS CADENA  LLAVE_C COMA
+           FOOTER DOS_PUNTOS LLAVE_A CADENA DOS_PUNTOS CADENA LLAVE_C COMA
+           BACKGROUND_COLOR DOS_PUNTOS HEXADECIMAL COMA
+           FONT_FAMILY DOS_PUNTOS CADENA COMA
+           FONT_SIZE DOS_PUNTOS CADENA
+
+
+
+            lista_instrucciones
+
+
+
+
+LLAVE_C
+
+
+            {:System.out.println("Simon se analizó bien");:}
+;
+
+campos ::= CADENA lista_campos ;
+
+lista_campos ::= COMA CADENA lista_campos
+                | /*vacio*/ ;
+
+
+
+
+
+
+
+
+
+
+lista_instrucciones ::= instruccion
+                        | lista_instrucciones instruccion;
+
+instruccion ::= asignacion_operacion_id
+                | condicion_if
+                | bucle_while
+                | bucle_do_while
+                | bucle_for
+                | LLAVE_A DATA DOS_PUNTOS grafica;
+
+
+
+
+
+
+
+
+
+grafica ::=   CORCHETE_A LLAVE_A grafica_barras
+            | CORCHETE_A LLAVE_A grafia_pastel
+            | CORCHETE_A LLAVE_A grafica_puntos
+            | CORCHETE_A LLAVE_A grafica_lineas
+            | LLAVE_A tarjeta_informacion
+
+
+
+            ;
+
+
+
+
+grafica_barras::= grafica_barra_simple         {: System.out.println("GRAFICA DE BARRAS SIMPLE");:}
+                 |  grafica_barras_extendida   {:System.out.println("GRAFICA DE BARRAS EXTENDIDA");:}
+
+
+
+                ;
+
+grafica_barra_simple ::= CATEGORY DOS_PUNTOS CADENA COMA VALUE DOS_PUNTOS CONSTANTE LLAVE_C mas_category_simple CORCHETE_C LLAVE_C
+
+
+                        ;
+
+mas_category_simple ::= COMA LLAVE_A CATEGORY  DOS_PUNTOS CADENA COMA VALUE DOS_PUNTOS CONSTANTE LLAVE_C mas_category_simple
+                        | /*vacio*/
+                        ;
+
+
+grafica_barras_extendida ::= CATEGORY DOS_PUNTOS CADENA COMA VALUE DOS_PUNTOS CONSTANTE COMA COLOR DOS_PUNTOS HEXADECIMAL LLAVE_C mas_category_extendida
+                                CORCHETE_C COMA
+                                CHART   DOS_PUNTOS LLAVE_A
+                                  TITLE DOS_PUNTOS CADENA COMA
+                                  X_AXIS_LABEL DOS_PUNTOS CADENA COMA
+                                  Y_AXIS_LABEL DOS_PUNTOS CADENA LLAVE_C LLAVE_C
+
+
+;
+
+mas_category_extendida ::=  COMA LLAVE_A CATEGORY DOS_PUNTOS CADENA COMA VALUE DOS_PUNTOS CONSTANTE COMA COLOR DOS_PUNTOS HEXADECIMAL LLAVE_C mas_category_extendida
+                            | /*vacio*/
+;
+
+
+grafia_pastel ::=  grafica_pastel_simple    {:System.out.println("Grafica pastel simple");:}
+                 | grafica_pastel_extendido {:System.out.println("Grafica pastel extendida");:}
+
+                    ;
+
+
+grafica_pastel_simple ::=  LABEL DOS_PUNTOS CADENA COMA VALUE DOS_PUNTOS CONSTANTE LLAVE_C mas_label CORCHETE_C LLAVE_C
+
+;
+
+
+mas_label ::= COMA LLAVE_A LABEL DOS_PUNTOS CADENA COMA VALUE DOS_PUNTOS CONSTANTE LLAVE_C mas_label
+            | /*vacio */
+;
+
+grafica_pastel_extendido ::= LABEL DOS_PUNTOS CADENA COMA VALUE DOS_PUNTOS CONSTANTE COMA COLOR DOS_PUNTOS HEXADECIMAL LLAVE_C mas_label_extendido CORCHETE_C COMA
+                              CHART DOS_PUNTOS LLAVE_A
+                                TITLE DOS_PUNTOS CADENA COMA
+                                LEGEND_POSITION DOS_PUNTOS CADENA LLAVE_C LLAVE_C
+
+
+;
+mas_label_extendido ::= COMA LLAVE_A LABEL DOS_PUNTOS CADENA COMA VALUE DOS_PUNTOS CONSTANTE COMA COLOR DOS_PUNTOS HEXADECIMAL LLAVE_C mas_label_extendido
+                        | /*vacio*/
+;
+
+grafica_puntos ::= grafica_puntos_simple       {:System.out.println("Grafica de puntos"); :}
+                  | grafica_puntos_expandida    {: System.out.println("GRAFICA DE PUNTOS EXPANDIDO");:}
+                  ;
+
+
+grafica_puntos_simple ::= X DOS_PUNTOS CONSTANTE COMA Y DOS_PUNTOS CONSTANTE LLAVE_C mas_coordenadas_simples CORCHETE_C LLAVE_C;
+
+
+
+mas_coordenadas_simples ::= COMA  LLAVE_A X DOS_PUNTOS CONSTANTE COMA Y DOS_PUNTOS CONSTANTE LLAVE_C mas_coordenadas_simples
+                        | /*vacio*/
+;
+
+
+grafica_puntos_expandida ::= X DOS_PUNTOS CONSTANTE COMA Y DOS_PUNTOS CONSTANTE COMA SIZE DOS_PUNTOS CONSTANTE COMA COLOR DOS_PUNTOS HEXADECIMAL LLAVE_C mas_coordenadas_expandidas CORCHETE_C COMA
+                            CHART DOS_PUNTOS LLAVE_A
+                            TITLE DOS_PUNTOS CADENA COMA
+                            X_AXIS_LABEL DOS_PUNTOS CADENA COMA
+                            Y_AXIS_LABEL DOS_PUNTOS CADENA LLAVE_C LLAVE_C
+
+;
+
+
+mas_coordenadas_expandidas ::= COMA LLAVE_A X DOS_PUNTOS CONSTANTE COMA Y DOS_PUNTOS CONSTANTE COMA SIZE DOS_PUNTOS CONSTANTE COMA  COLOR DOS_PUNTOS HEXADECIMAL LLAVE_C mas_coordenadas_expandidas
+                               | /*vacio*/ ;
+
+
+grafica_lineas ::= grafica_lineas_simple        {:System.out.println("GRAFICA DE LINEAS SIMPLES");:}
+                    | grafica_lineas_expandida  {: System.out.println("GRAFICA DE LINEAS EXPANDIDA");:}
+                    ;
+
+grafica_lineas_simple ::= NAME DOS_PUNTOS CADENA COMA POINTS DOS_PUNTOS CORCHETE_A
+                            LLAVE_A X DOS_PUNTOS CONSTANTE COMA Y DOS_PUNTOS CONSTANTE LLAVE_C
+                             mas_coordenadas_simples CORCHETE_C LLAVE_C series_simples CORCHETE_C COMA
+                             CHART DOS_PUNTOS LLAVE_A
+                                TITLE DOS_PUNTOS CADENA COMA
+                                X_AXIS_LABEL DOS_PUNTOS CADENA COMA
+                                Y_AXIS_LABEL DOS_PUNTOS CADENA LLAVE_C LLAVE_C
+
+
+;
+
+series_simples ::= COMA LLAVE_A NAME DOS_PUNTOS CADENA COMA POINTS DOS_PUNTOS CORCHETE_A
+                    LLAVE_A X DOS_PUNTOS CONSTANTE COMA Y DOS_PUNTOS CONSTANTE LLAVE_C
+                    mas_coordenadas_simples CORCHETE_C LLAVE_C series_simples
+                    | /*vacio*/
+;
+
+
+grafica_lineas_expandida ::= NAME DOS_PUNTOS CADENA COMA POINTS DOS_PUNTOS CORCHETE_A
+                            LLAVE_A X DOS_PUNTOS CONSTANTE COMA Y DOS_PUNTOS CONSTANTE COMA LABEL DOS_PUNTOS CADENA LLAVE_C mas_coordenadas_label CORCHETE_C COMA
+                            COLOR DOS_PUNTOS HEXADECIMAL COMA LINE_STYLE DOS_PUNTOS CADENA LLAVE_C series_expandidas CORCHETE_C COMA
+                            CHART DOS_PUNTOS LLAVE_A
+                            TITLE DOS_PUNTOS CADENA COMA
+                            X_AXIS_LABEL DOS_PUNTOS CADENA COMA
+                            Y_AXIS_LABEL DOS_PUNTOS CADENA LLAVE_C LLAVE_C
+
+
+
+;
+
+mas_coordenadas_label ::=  COMA LLAVE_A X DOS_PUNTOS CONSTANTE COMA Y DOS_PUNTOS CONSTANTE COMA LABEL DOS_PUNTOS CADENA LLAVE_C mas_coordenadas_label
+                            | /*vacio*/
+
+
+;
+
+series_expandidas ::= COMA LLAVE_A NAME DOS_PUNTOS CADENA COMA POINTS DOS_PUNTOS CORCHETE_A
+                       LLAVE_A X DOS_PUNTOS CONSTANTE COMA Y DOS_PUNTOS CONSTANTE COMA LABEL DOS_PUNTOS CADENA LLAVE_C mas_coordenadas_label CORCHETE_C COMA
+                       COLOR DOS_PUNTOS HEXADECIMAL COMA LINE_STYLE DOS_PUNTOS CADENA LLAVE_C
+
+
+
+;
+
+tarjeta_informacion ::=  tarjeta_informacion_simple     {: System.out.println("TARJETA INFORMACION SIMPLE"); :}
+                        | tarjeta_informacion_extendida {: System.out.println("TARJETA DE INFORMACION EXPANDIDA"); :}
+;
+
+
+tarjeta_informacion_simple ::= VALUE DOS_PUNTOS CONSTANTE COMA
+                                LABEL DOS_PUNTOS CADENA COMA
+                                DESCRIPTION DOS_PUNTOS CADENA LLAVE_C LLAVE_C
+
+;
+tarjeta_informacion_extendida ::= VALUE DOS_PUNTOS CONSTANTE COMA
+                                  LABEL DOS_PUNTOS CADENA COMA
+                                  DESCRIPTION DOS_PUNTOS CADENA COMA
+                                  ICON DOS_PUNTOS CADENA COMA
+                                  COLOR DOS_PUNTOS HEXADECIMAL COMA
+                                  LINK DOS_PUNTOS CADENA LLAVE_C LLAVE_C
+;
+
+
+
+// no se ha metido esto xd
+
+
+
+
+
+
+asignacion_operacion_id ::= asigancion                                              {:System.out.println("Asignacion");:}
+                          | IDENTIFICADOR asignacion_compuesta valor PUNTO_COMA     {:System.out.println("Asignacion Compuesta");:}
+                          | incremento_decremento PUNTO_COMA                        {:System.out.println("incremente o decremento");:}
+
+
+                            ;
+
+
+
+asigancion ::= IDENTIFICADOR IGUAL valor PUNTO_COMA
+                ;
+
+
+valor ::=  IDENTIFICADOR
+          | CONSTANTE
+          | TRUE
+          | FALSE
+          | CADENA
+;
+
+
+
+operacion ::=  valor operador_artimetico valor
+             | incremento_decremento valor
+             | IDENTIFICADOR asignacion_compuesta valor
+
+
+;
+asignacion_compuesta ::= MAS IGUAL
+                        | MENOS IGUAL
+                        | ASTERISCO IGUAL
+                        | BARRA IGUAL
+;
+
+
+operador_artimetico ::=   ASTERISCO
+                        | BARRA
+                        | MENOS
+                        | MAS
+;
+
+
+
+
+
+
+
+estructura_control ::= condicion_if
+                     | bucle_for
+                     | bucle_do_while
+                     | bucle_while
+
+
+
+    ;
+
+
+
+
+
+condicion_if ::= IF PARENTESIS_A condicion PARENTESIS_C LLAVE_A
+
+                lista_instrucciones
+
+                LLAVE_C
+
+                | IF PARENTESIS_A condicion  PARENTESIS_C LLAVE_A
+                lista_instrucciones
+
+                LLAVE_C
+                ELSE LLAVE_A
+                lista_instrucciones
+
+
+                LLAVE_C
+
+;
+
+
+
+
+
+bucle_for ::= FOR PARENTESIS_A IDENTIFICADOR IGUAL CONSTANTE  PUNTO_COMA condicional_for PUNTO_COMA  incremento_decremento PARENTESIS_C LLAVE_A
+                    lista_instrucciones
+                LLAVE_C
+
+
+
+;
+
+
+bucle_while ::= WHILE PARENTESIS_A condicion PARENTESIS_C LLAVE_A
+                lista_instrucciones
+                LLAVE_C
+
+;
+
+bucle_do_while ::=DO LLAVE_A
+                    lista_instrucciones
+
+                    LLAVE_C WHILE PARENTESIS_A condicion PARENTESIS_C PUNTO_COMA
+
+
+;
+
+
+
+
+
+
+
+
+
+condicional_for ::= IDENTIFICADOR MENOR_IGUAL constate_identificador
+                    | IDENTIFICADOR MAYOR_IGUAL constate_identificador
+
+;
+
+
+condicion ::= booolean
+            | IDENTIFICADOR comparador IDENTIFICADOR
+            | IDENTIFICADOR comparador CONSTANTE
+            | IDENTIFICADOR IGUAL_IGUAL booolean
+            | IDENTIFICADOR DIFERENTE booolean
+            | IDENTIFICADOR IGUAL_IGUAL CADENA
+
+
+;
+
+
+booolean ::= TRUE
+            | FALSE
+
+;
+
+comparador ::= IGUAL_IGUAL
+             | DIFERENTE
+             | MAYOR_QUE
+             | MENOR_QUE
+             | MENOR_IGUAL
+             | MAYOR_IGUAL
+
+
+;
+
+constate_identificador ::= IDENTIFICADOR
+                        | CONSTANTE
+;
+
+incremento_decremento ::= IDENTIFICADOR MAS MAS
+                        | IDENTIFICADOR MENOS MENOS
+;
+
+
+
