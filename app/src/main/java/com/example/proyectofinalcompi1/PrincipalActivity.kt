@@ -8,6 +8,10 @@ import androidx.appcompat.widget.AppCompatButton
 import androidx.appcompat.widget.AppCompatEditText
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.example.proyectofinalcompi1.AnalizadorLexico.analizadorLexico
+import com.example.proyectofinalcompi1.AnalizadorSintactico.AnalizadorSintactico
+import com.example.proyectofinalcompi1.Model.Grafica
+import java.io.StringReader
 
 class PrincipalActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -22,9 +26,38 @@ class PrincipalActivity : AppCompatActivity() {
 
             Log.i("AngelAPP","Contenido: ${contenido.text.toString()} ")
 
+
+            compile(contenido.text.toString());
+
+
+
+
+        }
+    }
+
+
+    fun compile(input: String){
+
+        val reader = StringReader(input)
+        val analizadorLexico = analizadorLexico(reader)
+
+        val analizadorSintactico = AnalizadorSintactico(analizadorLexico)
+
+        try {
+            analizadorSintactico.parse()
+
+
+
+
+            Log.i("AngelAPP", "Objeto traido de java: ")
+
+        } catch (e: Exception) {
+            println("Error: $e")
         }
 
 
-
     }
+
+
+
 }

@@ -1,7 +1,10 @@
-package AnalizadorSintactico;
+package com.example.proyectofinalcompi1.AnalizadorSintactico;
+
 import java.util.ArrayList;
 import java.util.List;
-import AnalizadorLexico.*;
+import com.example.proyectofinalcompi1.AnalizadorLexico.*;
+import com.example.proyectofinalcompi1.Model.*;
+import com.example.proyectofinalcompi1.Model.TablaSImbolos;
 
 import java_cup.runtime.*;
 
@@ -32,6 +35,29 @@ public void syntax_error(Symbol cur_token) {
 Errores=error.toString();
     System.out.println(error.toString());
 }
+
+
+private List<TablaSImbolos> tablaSimbolos= new ArrayList<>();
+private List<DatosGraficaBarras> datosGraficaBarras = new ArrayList<>();
+
+
+
+
+public List<TablaSImbolos> getTablaSimbolos(){
+return tablaSimbolos;
+}
+
+private boolean existeVariable(String variable){
+  for(TablaSImbolos tabla: tablaSimbolos){
+    if(tabla.getIdentificaor().equals(variable)){
+      return true;
+    }
+  }
+  return false;
+}
+
+
+
 
 
 
@@ -155,19 +181,19 @@ grafica ::=   CORCHETE_A LLAVE_A grafica_barras
 
 
 
-grafica_barras::= grafica_barra_simple         {: System.out.println("GRAFICA DE BARRAS SIMPLE");:}
+grafica_barras::= grafica_barra_simple         {: System.out.println("GRAFICA DE BARRAS SIMPLE"+ datosGraficaBarras); datosGraficaBarras.clear();   :}
                  |  grafica_barras_extendida   {:System.out.println("GRAFICA DE BARRAS EXTENDIDA");:}
 
 
 
                 ;
 
-grafica_barra_simple ::= CATEGORY DOS_PUNTOS CADENA COMA VALUE DOS_PUNTOS CONSTANTE LLAVE_C mas_category_simple CORCHETE_C LLAVE_C
+grafica_barra_simple ::= CATEGORY DOS_PUNTOS CADENA:cat COMA VALUE DOS_PUNTOS CONSTANTE:val LLAVE_C {:datosGraficaBarras.add(new DatosGraficaBarras(cat.toString(),  val.toString(), null )); :} mas_category_simple CORCHETE_C LLAVE_C
 
 
                         ;
 
-mas_category_simple ::= COMA LLAVE_A CATEGORY  DOS_PUNTOS CADENA COMA VALUE DOS_PUNTOS CONSTANTE LLAVE_C mas_category_simple
+mas_category_simple ::= COMA LLAVE_A CATEGORY  DOS_PUNTOS CADENA:cat COMA VALUE DOS_PUNTOS CONSTANTE:val LLAVE_C {:datosGraficaBarras.add(new DatosGraficaBarras(cat.toString(), val.toString(), null )); :} mas_category_simple
                         | /*vacio*/
                         ;
 
@@ -324,15 +350,22 @@ asignacion_operacion_id ::= asigancion                                          
 
 
 
-asigancion ::= IDENTIFICADOR IGUAL valor PUNTO_COMA
+asigancion ::= IDENTIFICADOR:id IGUAL valor:val PUNTO_COMA {:
+                                                                if(!existeVariable(id.toString())){
+
+                                                                Variable variable=(Variable) val; tablaSimbolos.add(new TablaSImbolos(variable.getTipoVariable(),id.toString(),(String) variable.getValor() ));
+                                                                }else{
+                                                                System.out.println("YA EXISTE LA VARIABLE");
+                                                                }
+                                                            :}
                 ;
 
 
-valor ::=  IDENTIFICADOR
-          | CONSTANTE
-          | TRUE
-          | FALSE
-          | CADENA
+valor ::=  IDENTIFICADOR:val {: RESULT= new Variable(TipoVariable.identificador,val.toString());  :}
+          | CONSTANTE:val    {: RESULT= new Variable(TipoVariable.constante,val.toString());  :}
+          | TRUE:val        {: RESULT=new Variable(TipoVariable.booleano, val.toString());  :}
+          | FALSE:val       {: RESULT=new Variable(TipoVariable.booleano,val.toString());  :}
+          | CADENA:val      {: RESULT=new Variable(TipoVariable.cadena,val.toString());  :}
 ;
 
 

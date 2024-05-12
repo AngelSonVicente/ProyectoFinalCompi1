@@ -19,7 +19,7 @@
         app:layout_constraintBottom_toTopOf="@+id/analizar"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-       android:layout_marginBottom="-600dp"
+       android:layout_marginBottom="50dp"
         app:layout_constraintTop_toTopOf="parent" />
 
 
