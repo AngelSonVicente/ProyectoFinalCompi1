@@ -10,6 +10,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.example.proyectofinalcompi1.AnalizadorLexico.analizadorLexico
 import com.example.proyectofinalcompi1.AnalizadorSintactico.AnalizadorSintactico
+import com.example.proyectofinalcompi1.Model.Accion
 import com.example.proyectofinalcompi1.Model.Grafica
 import java.io.StringReader
 
@@ -50,6 +51,11 @@ class PrincipalActivity : AppCompatActivity() {
 
 
             Log.i("AngelAPP", "Objeto traido de java: ")
+
+            val listaAcciones = analizadorSintactico.acciones;
+
+            Log.i("AngelAPP", "Lista de acciones: $listaAcciones")
+
 
         } catch (e: Exception) {
             println("Error: $e")

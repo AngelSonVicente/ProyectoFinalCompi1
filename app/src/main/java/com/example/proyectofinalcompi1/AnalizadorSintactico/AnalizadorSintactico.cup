@@ -42,13 +42,17 @@ private List<DatosGraficaBarras> datosGraficaBarras = new ArrayList<>();
 private List<DatosGraficaPuntos> coordenadas = new ArrayList<>();
 private List<Serie> series = new ArrayList<>();
 private List<PuntosSeries> puntosSeries= new ArrayList<>();
-
+private List<Accion>  accionList = new ArrayList<>();
 
 
 
 
 public List<TablaSImbolos> getTablaSimbolos(){
 return tablaSimbolos;
+}
+
+public List<Accion> getAcciones(){
+return accionList;
 }
 
 private boolean existeVariable(String variable){
@@ -99,7 +103,8 @@ non terminal   inicio, campos, lista_campos, grafica, grafica_barras, grafica_ba
                tarjeta_informacion_simple, tarjeta_informacion_extendida, tarjeta_informacion, asigancion, valor, operacion, condicion_if,
                condicion, booolean, comparador, bucle_for, condicional_for, constate_identificador, incremento_decremento, bucle_while,
                bucle_do_while, codigo, asignaciones, graficas, contenido, operaciones, estructura_control, estructuras_control,
-               operador_artimetico, asignacion_compuesta, asignacion_operacion, asignacion_operacion_id, lista_instrucciones, instruccion
+               operador_artimetico, asignacion_compuesta, asignacion_operacion, asignacion_operacion_id, lista_instrucciones, instruccion,
+               lista_instrucciones2
 
 
 
@@ -131,15 +136,18 @@ inicio ::= LLAVE_A
 
 
 
-            lista_instrucciones
+            lista_instrucciones:ins
 
 
 
 
 LLAVE_C
+{:
+    accionList= (List<Accion>) ins;
+:}
 
 
-            {:System.out.println("Simon se analizó bien");:}
+
 ;
 
 campos ::= CADENA lista_campos ;
@@ -154,17 +162,83 @@ lista_campos ::= COMA CADENA lista_campos
 
 
 
+//intrccion una sola instruccion
+//lista_instruccion instruccion muchas instrucciones
+
+lista_instrucciones ::= instruccion:in                                          {: List<Accion> acciones = new ArrayList<>();
+                                                                                    if(in instanceof  GraficaBarras){
+                                                                                    acciones.add(new Accion((GraficaBarras) in,null,null,null,null,null,null,null));
+                                                                                    }
+                                                                                    if(in instanceof GraficaLineas){
+                                                                                    acciones.add(new Accion(null,(GraficaLineas) in,null,null,null,null,null,null));
+                                                                                    }
+                                                                                    if(in instanceof GraficaPastel){
+                                                                                    acciones.add(new Accion(null,null,(GraficaPastel) in,null,null,null,null,null));
+                                                                                    }if(in instanceof GraficaPuntos){
+                                                                                    acciones.add(new Accion(null,null,null,(GraficaPuntos) in,null,null,null,null));
+                                                                                    }if(in instanceof TarjetaInformacion){
+                                                                                    acciones.add(new Accion(null,null,null,null,(TarjetaInformacion) in,null,null,null));
+                                                                                    }
+                                                                                    if(in instanceof IfCondicional){
+                                                                                    acciones.add(new Accion(null,null,null,null,null,(IfCondicional) in,null,null));
+                                                                                    }if(in instanceof WhileCiclo){
+                                                                                    acciones.add(new Accion(null,null,null,null,null,null,(WhileCiclo) in,null));
+                                                                                    }if(in instanceof ForCiclo){
+                                                                                    acciones.add(new Accion(null,null,null,null,null,null,null,(ForCiclo) in));
+                                                                                    }
 
 
-lista_instrucciones ::= instruccion
-                        | lista_instrucciones instruccion;
+
+                                                                                    RESULT=acciones;
+                                                                                    :}
+
+                        | lista_instrucciones:listaInstruccion instruccion:in       {: List<Accion> acciones = (List<Accion>  )listaInstruccion;
+                                                                                        if(in instanceof  GraficaBarras){
+                                                                                        acciones.add(new Accion((GraficaBarras) in,null,null,null,null,null,null,null));
+                                                                                        }
+                                                                                        if(in instanceof GraficaLineas){
+                                                                                        acciones.add(new Accion(null,(GraficaLineas) in,null,null,null,null,null,null));
+                                                                                        }
+                                                                                        if(in instanceof GraficaPastel){
+                                                                                        acciones.add(new Accion(null,null,(GraficaPastel) in,null,null,null,null,null));
+                                                                                        }if(in instanceof GraficaPuntos){
+                                                                                        acciones.add(new Accion(null,null,null,(GraficaPuntos) in,null,null,null,null));
+                                                                                        }if(in instanceof TarjetaInformacion){
+                                                                                        acciones.add(new Accion(null,null,null,null,(TarjetaInformacion) in,null,null,null));
+                                                                                        }
+                                                                                        if(in instanceof IfCondicional){
+                                                                                        acciones.add(new Accion(null,null,null,null,null,(IfCondicional) in,null,null));
+                                                                                        }
+                                                                                        if(in instanceof WhileCiclo){
+                                                                                        acciones.add(new Accion(null,null,null,null,null,null,(WhileCiclo) in,null));
+                                                                                        }if(in instanceof ForCiclo){
+                                                                                        acciones.add(new Accion(null,null,null,null,null,null,null,(ForCiclo) in));
+                                                                                        }
+
+                                                                                        RESULT=acciones;
+                                                                                        :}
+
+
+                        ;
+
+
+
+
+
+
 
 instruccion ::= asignacion_operacion_id
-                | condicion_if
-                | bucle_while
-                | bucle_do_while
-                | bucle_for
-                | LLAVE_A DATA DOS_PUNTOS grafica;
+                | condicion_if:condicion                                             {: RESULT=condicion; :}
+                | bucle_while:bucle                                                  {:RESULT=bucle; System.out.println("\n\n\nWhile"+bucle.toString());:}
+                | bucle_do_while:bucle                                               {:RESULT=bucle; System.out.println("\n\n\nWhile"+bucle.toString());:}
+                | bucle_for:bucle                                                    {:RESULT=bucle;:}
+                | LLAVE_A DATA DOS_PUNTOS CORCHETE_A LLAVE_A grafica_barras:grafica {: RESULT=grafica; :}
+                | LLAVE_A DATA DOS_PUNTOS CORCHETE_A LLAVE_A grafia_pastel:grafica  {: RESULT=grafica; :}
+                | LLAVE_A DATA DOS_PUNTOS CORCHETE_A LLAVE_A grafica_puntos:grafica {: RESULT=grafica; :}
+                | LLAVE_A DATA DOS_PUNTOS CORCHETE_A LLAVE_A grafica_lineas:grafica {: RESULT=grafica; :}
+                | LLAVE_A DATA DOS_PUNTOS LLAVE_A tarjeta_informacion:grafica       {: RESULT=grafica; :}
+
+;
 
 
 
@@ -174,21 +248,13 @@ instruccion ::= asignacion_operacion_id
 
 
 
-grafica ::=   CORCHETE_A LLAVE_A grafica_barras
-            | CORCHETE_A LLAVE_A grafia_pastel
-            | CORCHETE_A LLAVE_A grafica_puntos
-            | CORCHETE_A LLAVE_A grafica_lineas
-            | LLAVE_A tarjeta_informacion
-
-
-
-            ;
 
 
 
 
-grafica_barras::= grafica_barra_simple:grafica         {: System.out.println("GRAFICA DE BARRAS SIMPLE"+ grafica.toString());     :}
-                 |  grafica_barras_extendida:grafica   {: System.out.println("GRAFICA DE BARRAS EXTENDIDA"+grafica.toString());   :}
+
+grafica_barras::= grafica_barra_simple:grafica         {: System.out.println("GRAFICA DE BARRAS SIMPLE"+ grafica.toString());       RESULT=grafica; :}
+                 |  grafica_barras_extendida:grafica   {: System.out.println("GRAFICA DE BARRAS EXTENDIDA"+grafica.toString());  RESULT=grafica; :}
 
 
 
@@ -219,8 +285,8 @@ mas_category_extendida ::=  COMA LLAVE_A CATEGORY DOS_PUNTOS CADENA:cad COMA VAL
 ;
 
 
-grafia_pastel ::=  grafica_pastel_simple:grafica    {:System.out.println("Grafica pastel simple"+ grafica.toString());:}
-                 | grafica_pastel_extendido:grafica {:System.out.println("Grafica pastel extendida"+grafica.toString());:}
+grafia_pastel ::=  grafica_pastel_simple:grafica    {:System.out.println("Grafica pastel simple"+ grafica.toString());  RESULT=grafica; :}
+                 | grafica_pastel_extendido:grafica {:System.out.println("Grafica pastel extendida"+grafica.toString());    RESULT=grafica; :}
 
                     ;
 
@@ -260,8 +326,8 @@ mas_label_extendido ::= COMA LLAVE_A LABEL DOS_PUNTOS CADENA:cad COMA VALUE DOS_
 
 
 
-grafica_puntos ::= grafica_puntos_simple:grafica       {:System.out.println("Grafica de puntos: "+grafica.toString()); :}
-                  | grafica_puntos_expandida:grafica    {: System.out.println("GRAFICA DE PUNTOS EXPANDIDO" + grafica.toString());:}
+grafica_puntos ::= grafica_puntos_simple:grafica       {:System.out.println("Grafica de puntos: "+grafica.toString());  RESULT=grafica; :}
+                  | grafica_puntos_expandida:grafica    {: System.out.println("GRAFICA DE PUNTOS EXPANDIDO" + grafica.toString());  RESULT=grafica;:}
                   ;
 
 
@@ -288,8 +354,8 @@ mas_coordenadas_expandidas ::= COMA LLAVE_A X DOS_PUNTOS CONSTANTE:x COMA Y DOS_
                                | /*vacio*/ ;
 
 
-grafica_lineas ::= grafica_lineas_simple:grafica        {:System.out.println("GRAFICA DE LINEAS SIMPLES"+ grafica.toString());:}
-                    | grafica_lineas_expandida:grafica  {: System.out.println("GRAFICA DE LINEAS EXPANDIDA"+ grafica.toString());:}
+grafica_lineas ::= grafica_lineas_simple:grafica        {:System.out.println("GRAFICA DE LINEAS SIMPLES"+ grafica.toString());  RESULT=grafica;:}
+                    | grafica_lineas_expandida:grafica  {: System.out.println("GRAFICA DE LINEAS EXPANDIDA"+ grafica.toString());   RESULT=grafica;:}
                     ;
 
 grafica_lineas_simple ::= NAME DOS_PUNTOS CADENA:nombreSerie COMA POINTS DOS_PUNTOS CORCHETE_A
@@ -339,8 +405,8 @@ series_expandidas ::= COMA LLAVE_A NAME DOS_PUNTOS CADENA:nombreSerie COMA POINT
 
 ;
 
-tarjeta_informacion ::=  tarjeta_informacion_simple:tarjeta    {: System.out.println("TARJETA INFORMACION SIMPLE"+tarjeta.toString()); :}
-                        | tarjeta_informacion_extendida:tarjeta         {: System.out.println("TARJETA DE INFORMACION EXPANDIDA" +tarjeta.toString()); :}
+tarjeta_informacion ::=  tarjeta_informacion_simple:tarjeta    {: System.out.println("TARJETA INFORMACION SIMPLE"+tarjeta.toString());                  RESULT=tarjeta;:}
+                        | tarjeta_informacion_extendida:tarjeta         {: System.out.println("TARJETA DE INFORMACION EXPANDIDA" +tarjeta.toString());  RESULT=tarjeta;:}
 ;
 
 
@@ -420,37 +486,51 @@ operador_artimetico ::=   ASTERISCO
 
 
 
+condicion_if ::= IF PARENTESIS_A condicion:cond PARENTESIS_C LLAVE_A
 
-
-
-estructura_control ::= condicion_if
-                     | bucle_for
-                     | bucle_do_while
-                     | bucle_while
-
-
-
-    ;
-
-
-
-
-
-condicion_if ::= IF PARENTESIS_A condicion PARENTESIS_C LLAVE_A
-
-                lista_instrucciones
+                lista_instrucciones:in
 
                 LLAVE_C
 
-                | IF PARENTESIS_A condicion  PARENTESIS_C LLAVE_A
-                lista_instrucciones
+                {: IfCondicional condicionIF = null;
+
+
+                 if(cond instanceof Boolean){
+                    condicionIF = new IfCondicional((Boolean) cond,null,null,null,new ArrayList<>((List<Accion>)in ),null);
+                }else{
+
+                Condicional condicion= (Condicional) cond;
+                    condicionIF = new IfCondicional(null,condicion.getVal1(),condicion.getComparador(),condicion.getVal2(),new ArrayList<>((List<Accion>)in ),null);
+
+
+                }
+
+                RESULT= condicionIF;  :}
+
+                | IF PARENTESIS_A condicion:cond  PARENTESIS_C LLAVE_A
+                lista_instrucciones:in1
 
                 LLAVE_C
                 ELSE LLAVE_A
-                lista_instrucciones
+                lista_instrucciones:in2
 
 
                 LLAVE_C
+                   {: IfCondicional condicionIF = null;
+
+
+                               if(cond instanceof Boolean){
+                                  condicionIF = new IfCondicional((Boolean) cond,null,null,null,new ArrayList<>((List<Accion>)in1 ),new ArrayList<>((List<Accion>)in2 ));
+                              }else{
+
+                              Condicional condicion= (Condicional) cond;
+                                  condicionIF = new IfCondicional(null,condicion.getVal1(),condicion.getComparador(),condicion.getVal2(),new ArrayList<>((List<Accion>)in1 ),new ArrayList<>((List<Accion>)in2 ));
+
+
+                              }
+
+                              RESULT= condicionIF;
+                   :}
 
 ;
 
@@ -458,75 +538,112 @@ condicion_if ::= IF PARENTESIS_A condicion PARENTESIS_C LLAVE_A
 
 
 
-bucle_for ::= FOR PARENTESIS_A IDENTIFICADOR IGUAL CONSTANTE  PUNTO_COMA condicional_for PUNTO_COMA  incremento_decremento PARENTESIS_C LLAVE_A
-                    lista_instrucciones
+bucle_for ::= FOR PARENTESIS_A IDENTIFICADOR:idIncial IGUAL constate_identificador:valorInicial  PUNTO_COMA condicional_for:cond PUNTO_COMA  incremento_decremento:paso PARENTESIS_C LLAVE_A
+                    lista_instrucciones:in
                 LLAVE_C
+
+            {:
+            Condicional condicional =(Condicional)cond;
+            IncrementoDecremento pasoFor = (IncrementoDecremento) paso;
+            RESULT=new ForCiclo(valorInicial.toString(),condicional.getVal2(), pasoFor.getTipoIncremento(),new ArrayList<>((List<Accion>)in )); :}
 
 
 
 ;
 
 
-bucle_while ::= WHILE PARENTESIS_A condicion PARENTESIS_C LLAVE_A
-                lista_instrucciones
+bucle_while ::= WHILE PARENTESIS_A condicion:cond PARENTESIS_C LLAVE_A
+                lista_instrucciones:in
                 LLAVE_C
+   {: WhileCiclo whileCiclo = null;
+
+
+                 if(cond instanceof Boolean){
+                    whileCiclo = new WhileCiclo((Boolean) cond,null,null,null,new ArrayList<>((List<Accion>)in ));
+                }else{
+
+                Condicional condicion= (Condicional) cond;
+                    whileCiclo = new WhileCiclo(null,condicion.getVal1(),condicion.getComparador(),condicion.getVal2(),new ArrayList<>((List<Accion>)in ));
+
+
+                }
+
+                RESULT= whileCiclo;  :}
+
 
 ;
 
 bucle_do_while ::=DO LLAVE_A
-                    lista_instrucciones
+                    lista_instrucciones:in
 
-                    LLAVE_C WHILE PARENTESIS_A condicion PARENTESIS_C PUNTO_COMA
+                    LLAVE_C WHILE PARENTESIS_A condicion:cond PARENTESIS_C PUNTO_COMA
 
-
-;
-
+{: WhileCiclo whileCiclo = null;
 
 
+                 if(cond instanceof Boolean){
+                    whileCiclo = new WhileCiclo((Boolean) cond,null,null,null,new ArrayList<>((List<Accion>)in ));
+                }else{
+
+                Condicional condicion= (Condicional) cond;
+                    whileCiclo = new WhileCiclo(null,condicion.getVal1(),condicion.getComparador(),condicion.getVal2(),new ArrayList<>((List<Accion>)in ));
 
 
+                }
 
+                RESULT= whileCiclo;  :}
 
-
-
-condicional_for ::= IDENTIFICADOR MENOR_IGUAL constate_identificador
-                    | IDENTIFICADOR MAYOR_IGUAL constate_identificador
-
-;
-
-
-condicion ::= booolean
-            | IDENTIFICADOR comparador IDENTIFICADOR
-            | IDENTIFICADOR comparador CONSTANTE
-            | IDENTIFICADOR IGUAL_IGUAL booolean
-            | IDENTIFICADOR DIFERENTE booolean
-            | IDENTIFICADOR IGUAL_IGUAL CADENA
 
 
 ;
 
 
-booolean ::= TRUE
-            | FALSE
+
+
+
+
+
+
+
+condicional_for ::= IDENTIFICADOR:val1 MENOR_IGUAL constate_identificador:val2    {:RESULT= new Condicional(val1.toString(),Comparador.MENOR_IGUAL,val2.toString());:}
+                    | IDENTIFICADOR:val1 MAYOR_IGUAL constate_identificador:val2    {:RESULT= new Condicional(val1.toString(),Comparador.MAYOR_IGUAL,val2.toString());:}
+                    | IDENTIFICADOR:val1 MAYOR_QUE constate_identificador:val2    {:RESULT= new Condicional(val1.toString(),Comparador.MAYOR_QUE,val2.toString());:}
+                    | IDENTIFICADOR:val1 MENOR_QUE constate_identificador:val2    {:RESULT= new Condicional(val1.toString(),Comparador.MENOR_QUE,val2.toString());:}
 
 ;
 
-comparador ::= IGUAL_IGUAL
-             | DIFERENTE
-             | MAYOR_QUE
-             | MENOR_QUE
-             | MENOR_IGUAL
-             | MAYOR_IGUAL
+
+condicion ::= booolean:b                                                 {: RESULT=b;:}
+            | IDENTIFICADOR:val1 comparador:comp IDENTIFICADOR:val2      {:RESULT=new Condicional(val1.toString(),(Comparador) comp,val2.toString());:}
+            | IDENTIFICADOR:val1 comparador:comp CONSTANTE:val2           {:RESULT=new Condicional(val1.toString(),(Comparador) comp,val2.toString());:}
+            | IDENTIFICADOR:val1 IGUAL_IGUAL booolean:val2               {:RESULT=new Condicional(val1.toString(),Comparador.IGUAL_IGUAL,val2.toString());:}
+            | IDENTIFICADOR:val1 DIFERENTE booolean:val2                 {:RESULT=new Condicional(val1.toString(),Comparador.DIFERENTE,val2.toString());:}
+            | IDENTIFICADOR:val1 IGUAL_IGUAL CADENA :val2                {:RESULT=new Condicional(val1.toString(),Comparador.IGUAL_IGUAL,val2.toString());:}
+
+;
+
+
+booolean ::= TRUE           {:RESULT=true;:}
+            | FALSE         {:RESULT=false;:}
+
+;
+
+comparador ::= IGUAL_IGUAL      {:RESULT=Comparador.IGUAL_IGUAL;:}
+             | DIFERENTE        {:RESULT=Comparador.DIFERENTE;:}
+             | MAYOR_QUE        {:RESULT=Comparador.MAYOR_QUE;:}
+             | MENOR_QUE        {:RESULT=Comparador.MENOR_QUE;:}
+             | MENOR_IGUAL      {:RESULT=Comparador.MENOR_IGUAL;:}
+             | MAYOR_IGUAL      {:RESULT=Comparador.MAYOR_IGUAL;:}
 
 
 ;
 
-constate_identificador ::= IDENTIFICADOR
-                        | CONSTANTE
+constate_identificador ::= IDENTIFICADOR:id {:RESULT=id;:}
+                        | CONSTANTE:cons    {: RESULT=cons;:}
 ;
 
-incremento_decremento ::= IDENTIFICADOR MAS MAS
-                        | IDENTIFICADOR MENOS MENOS
+incremento_decremento ::= IDENTIFICADOR:id MAS MAS         {:RESULT=new IncrementoDecremento(id.toString(),PasoFor.incremento); :}
+                        | IDENTIFICADOR:id MENOS MENOS       {:RESULT=new IncrementoDecremento(id.toString(),PasoFor.decremento); :}
 ;
 
 
