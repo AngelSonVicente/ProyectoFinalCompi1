@@ -39,6 +39,10 @@ Errores=error.toString();
 
 private List<TablaSImbolos> tablaSimbolos= new ArrayList<>();
 private List<DatosGraficaBarras> datosGraficaBarras = new ArrayList<>();
+private List<DatosGraficaPuntos> coordenadas = new ArrayList<>();
+private List<Serie> series = new ArrayList<>();
+private List<PuntosSeries> puntosSeries= new ArrayList<>();
+
 
 
 
@@ -50,6 +54,8 @@ return tablaSimbolos;
 private boolean existeVariable(String variable){
   for(TablaSImbolos tabla: tablaSimbolos){
     if(tabla.getIdentificaor().equals(variable)){
+    //setear el valor tambien
+
       return true;
     }
   }
@@ -79,7 +85,7 @@ terminal        TITLE, DESCRIPTION, KEYWORDS, HEADER, FOOTER, BACKGROUND_COLOR, 
                 ICON, LINK, IF, ELSE, FOR, WHILE, DO, ASTERISCO, COMA, PUNTO_COMA, DOS_PUNTOS,
                 PARENTESIS_A, PARENTESIS_C, LLAVE_A, LLAVE_C, CORCHETE_A, CORCHETE_C, BARRA,
                 MENOR_IGUAL, MAYOR_IGUAL, DIFERENTE, IGUAL, IGUAL_IGUAL, MENOR_QUE, MAYOR_QUE,
-                MAS, MENOS, IDENTIFICADOR, HEXADECIMAL, CONSTANTE, COMILLA, CADENA, TRUE, FALSE
+                MAS, MENOS, IDENTIFICADOR, HEXADECIMAL, COMILLA, CADENA, TRUE, FALSE, CONSTANTE
 
                 ;
 
@@ -181,14 +187,14 @@ grafica ::=   CORCHETE_A LLAVE_A grafica_barras
 
 
 
-grafica_barras::= grafica_barra_simple         {: System.out.println("GRAFICA DE BARRAS SIMPLE"+ datosGraficaBarras); datosGraficaBarras.clear();   :}
-                 |  grafica_barras_extendida   {:System.out.println("GRAFICA DE BARRAS EXTENDIDA");:}
+grafica_barras::= grafica_barra_simple:grafica         {: System.out.println("GRAFICA DE BARRAS SIMPLE"+ grafica.toString());     :}
+                 |  grafica_barras_extendida:grafica   {: System.out.println("GRAFICA DE BARRAS EXTENDIDA"+grafica.toString());   :}
 
 
 
                 ;
 
-grafica_barra_simple ::= CATEGORY DOS_PUNTOS CADENA:cat COMA VALUE DOS_PUNTOS CONSTANTE:val LLAVE_C {:datosGraficaBarras.add(new DatosGraficaBarras(cat.toString(),  val.toString(), null )); :} mas_category_simple CORCHETE_C LLAVE_C
+grafica_barra_simple ::= CATEGORY DOS_PUNTOS CADENA:cat COMA VALUE DOS_PUNTOS CONSTANTE:val LLAVE_C {:datosGraficaBarras.add(new DatosGraficaBarras(cat.toString(),  val.toString(), null )); :} mas_category_simple CORCHETE_C LLAVE_C {: RESULT = new GraficaBarras(true,new ArrayList<>(datosGraficaBarras),null,null,null,null,null,null); datosGraficaBarras.clear(); :}
 
 
                         ;
@@ -198,138 +204,161 @@ mas_category_simple ::= COMA LLAVE_A CATEGORY  DOS_PUNTOS CADENA:cat COMA VALUE 
                         ;
 
 
-grafica_barras_extendida ::= CATEGORY DOS_PUNTOS CADENA COMA VALUE DOS_PUNTOS CONSTANTE COMA COLOR DOS_PUNTOS HEXADECIMAL LLAVE_C mas_category_extendida
+grafica_barras_extendida ::= CATEGORY DOS_PUNTOS CADENA:cad COMA VALUE DOS_PUNTOS CONSTANTE:val COMA COLOR DOS_PUNTOS HEXADECIMAL:color LLAVE_C {: datosGraficaBarras.add(new DatosGraficaBarras(cad.toString(),val.toString(),color.toString()));  :} mas_category_extendida
                                 CORCHETE_C COMA
                                 CHART   DOS_PUNTOS LLAVE_A
-                                  TITLE DOS_PUNTOS CADENA COMA
-                                  X_AXIS_LABEL DOS_PUNTOS CADENA COMA
-                                  Y_AXIS_LABEL DOS_PUNTOS CADENA LLAVE_C LLAVE_C
-
+                                  TITLE DOS_PUNTOS CADENA:title COMA
+                                  X_AXIS_LABEL DOS_PUNTOS CADENA:xlabel COMA
+                                  Y_AXIS_LABEL DOS_PUNTOS CADENA:ylabel LLAVE_C LLAVE_C
+                        {: RESULT=new GraficaBarras(false, new ArrayList<>(datosGraficaBarras), title.toString(), xlabel.toString(), ylabel.toString(),null,null,null); datosGraficaBarras.clear(); :}
 
 ;
 
-mas_category_extendida ::=  COMA LLAVE_A CATEGORY DOS_PUNTOS CADENA COMA VALUE DOS_PUNTOS CONSTANTE COMA COLOR DOS_PUNTOS HEXADECIMAL LLAVE_C mas_category_extendida
+mas_category_extendida ::=  COMA LLAVE_A CATEGORY DOS_PUNTOS CADENA:cad COMA VALUE DOS_PUNTOS CONSTANTE:val COMA COLOR DOS_PUNTOS HEXADECIMAL:color LLAVE_C {:  datosGraficaBarras.add(new DatosGraficaBarras(cad.toString(),val.toString(),color.toString()));  :} mas_category_extendida
                             | /*vacio*/
 ;
 
 
-grafia_pastel ::=  grafica_pastel_simple    {:System.out.println("Grafica pastel simple");:}
-                 | grafica_pastel_extendido {:System.out.println("Grafica pastel extendida");:}
+grafia_pastel ::=  grafica_pastel_simple:grafica    {:System.out.println("Grafica pastel simple"+ grafica.toString());:}
+                 | grafica_pastel_extendido:grafica {:System.out.println("Grafica pastel extendida"+grafica.toString());:}
 
                     ;
 
 
-grafica_pastel_simple ::=  LABEL DOS_PUNTOS CADENA COMA VALUE DOS_PUNTOS CONSTANTE LLAVE_C mas_label CORCHETE_C LLAVE_C
+grafica_pastel_simple ::=  LABEL DOS_PUNTOS CADENA:cad COMA VALUE DOS_PUNTOS CONSTANTE:val LLAVE_C {: datosGraficaBarras.add(new DatosGraficaBarras(cad.toString(),  val.toString(), null )); :}mas_label CORCHETE_C LLAVE_C {: RESULT=new GraficaPastel(true, new ArrayList<>(datosGraficaBarras),null,null,null,null,null); datosGraficaBarras.clear(); :}
 
 ;
 
 
-mas_label ::= COMA LLAVE_A LABEL DOS_PUNTOS CADENA COMA VALUE DOS_PUNTOS CONSTANTE LLAVE_C mas_label
+mas_label ::= COMA LLAVE_A LABEL DOS_PUNTOS CADENA:cad COMA VALUE DOS_PUNTOS CONSTANTE:val LLAVE_C {: datosGraficaBarras.add(new DatosGraficaBarras(cad.toString(),val.toString(),null)); :} mas_label
             | /*vacio */
 ;
 
-grafica_pastel_extendido ::= LABEL DOS_PUNTOS CADENA COMA VALUE DOS_PUNTOS CONSTANTE COMA COLOR DOS_PUNTOS HEXADECIMAL LLAVE_C mas_label_extendido CORCHETE_C COMA
+grafica_pastel_extendido ::= LABEL DOS_PUNTOS CADENA:cad COMA VALUE DOS_PUNTOS CONSTANTE:val COMA COLOR DOS_PUNTOS HEXADECIMAL:color LLAVE_C {: datosGraficaBarras.add(new DatosGraficaBarras(cad.toString(),val.toString(),color.toString())); :}mas_label_extendido CORCHETE_C COMA
                               CHART DOS_PUNTOS LLAVE_A
-                                TITLE DOS_PUNTOS CADENA COMA
-                                LEGEND_POSITION DOS_PUNTOS CADENA LLAVE_C LLAVE_C
+                                TITLE DOS_PUNTOS CADENA:title COMA
+                                LEGEND_POSITION DOS_PUNTOS CADENA:legendPosition LLAVE_C LLAVE_C
+                                {: RESULT=new GraficaPastel(false, new ArrayList<>(datosGraficaBarras), title.toString(), legendPosition.toString(), null,null,null); datosGraficaBarras.clear();  :}
 
 
 ;
-mas_label_extendido ::= COMA LLAVE_A LABEL DOS_PUNTOS CADENA COMA VALUE DOS_PUNTOS CONSTANTE COMA COLOR DOS_PUNTOS HEXADECIMAL LLAVE_C mas_label_extendido
+mas_label_extendido ::= COMA LLAVE_A LABEL DOS_PUNTOS CADENA:cad COMA VALUE DOS_PUNTOS CONSTANTE:val COMA COLOR DOS_PUNTOS HEXADECIMAL:color LLAVE_C {:datosGraficaBarras.add(new DatosGraficaBarras(cad.toString(),val.toString(),color.toString()));:}mas_label_extendido
                         | /*vacio*/
 ;
 
-grafica_puntos ::= grafica_puntos_simple       {:System.out.println("Grafica de puntos"); :}
-                  | grafica_puntos_expandida    {: System.out.println("GRAFICA DE PUNTOS EXPANDIDO");:}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+grafica_puntos ::= grafica_puntos_simple:grafica       {:System.out.println("Grafica de puntos: "+grafica.toString()); :}
+                  | grafica_puntos_expandida:grafica    {: System.out.println("GRAFICA DE PUNTOS EXPANDIDO" + grafica.toString());:}
                   ;
 
 
-grafica_puntos_simple ::= X DOS_PUNTOS CONSTANTE COMA Y DOS_PUNTOS CONSTANTE LLAVE_C mas_coordenadas_simples CORCHETE_C LLAVE_C;
+grafica_puntos_simple ::= X DOS_PUNTOS CONSTANTE:x COMA Y DOS_PUNTOS CONSTANTE:y  LLAVE_C {: coordenadas.add(new DatosGraficaPuntos(Integer.parseInt(x.toString()),Integer.parseInt(y.toString()),null,null)); :} mas_coordenadas_simples CORCHETE_C LLAVE_C {: RESULT = new GraficaPuntos(true, new ArrayList<>(coordenadas),null,null,null ,null,null,null );  coordenadas.clear(); :}
 
+;
 
-
-mas_coordenadas_simples ::= COMA  LLAVE_A X DOS_PUNTOS CONSTANTE COMA Y DOS_PUNTOS CONSTANTE LLAVE_C mas_coordenadas_simples
+mas_coordenadas_simples ::= COMA  LLAVE_A X DOS_PUNTOS CONSTANTE:x COMA Y DOS_PUNTOS CONSTANTE:y LLAVE_C {:coordenadas.add(new DatosGraficaPuntos(Integer.parseInt(x.toString()),Integer.parseInt(y.toString()),null,null)); :} mas_coordenadas_simples
                         | /*vacio*/
 ;
 
 
-grafica_puntos_expandida ::= X DOS_PUNTOS CONSTANTE COMA Y DOS_PUNTOS CONSTANTE COMA SIZE DOS_PUNTOS CONSTANTE COMA COLOR DOS_PUNTOS HEXADECIMAL LLAVE_C mas_coordenadas_expandidas CORCHETE_C COMA
+grafica_puntos_expandida ::= X DOS_PUNTOS CONSTANTE:x COMA Y DOS_PUNTOS CONSTANTE:y COMA SIZE DOS_PUNTOS CONSTANTE:size COMA COLOR DOS_PUNTOS HEXADECIMAL:color LLAVE_C {:coordenadas.add(new DatosGraficaPuntos(Integer.parseInt(x.toString()),Integer.parseInt(y.toString()),Integer.parseInt(size.toString()), color.toString())); :} mas_coordenadas_expandidas CORCHETE_C COMA
                             CHART DOS_PUNTOS LLAVE_A
-                            TITLE DOS_PUNTOS CADENA COMA
-                            X_AXIS_LABEL DOS_PUNTOS CADENA COMA
-                            Y_AXIS_LABEL DOS_PUNTOS CADENA LLAVE_C LLAVE_C
+                            TITLE DOS_PUNTOS CADENA:title COMA
+                            X_AXIS_LABEL DOS_PUNTOS CADENA:xlabel COMA
+                            Y_AXIS_LABEL DOS_PUNTOS CADENA:ylabel LLAVE_C LLAVE_C
+                            {:  RESULT = new GraficaPuntos(false, new ArrayList<>(coordenadas),title.toString(),xlabel.toString(),ylabel.toString() ,null,null,null ); coordenadas.clear(); :}
 
 ;
 
 
-mas_coordenadas_expandidas ::= COMA LLAVE_A X DOS_PUNTOS CONSTANTE COMA Y DOS_PUNTOS CONSTANTE COMA SIZE DOS_PUNTOS CONSTANTE COMA  COLOR DOS_PUNTOS HEXADECIMAL LLAVE_C mas_coordenadas_expandidas
+mas_coordenadas_expandidas ::= COMA LLAVE_A X DOS_PUNTOS CONSTANTE:x COMA Y DOS_PUNTOS CONSTANTE:y COMA SIZE DOS_PUNTOS CONSTANTE:size COMA  COLOR DOS_PUNTOS HEXADECIMAL:color LLAVE_C {:coordenadas.add(new DatosGraficaPuntos(Integer.parseInt(x.toString()),Integer.parseInt(y.toString()),Integer.parseInt(size.toString()), color.toString())); :} mas_coordenadas_expandidas
                                | /*vacio*/ ;
 
 
-grafica_lineas ::= grafica_lineas_simple        {:System.out.println("GRAFICA DE LINEAS SIMPLES");:}
-                    | grafica_lineas_expandida  {: System.out.println("GRAFICA DE LINEAS EXPANDIDA");:}
+grafica_lineas ::= grafica_lineas_simple:grafica        {:System.out.println("GRAFICA DE LINEAS SIMPLES"+ grafica.toString());:}
+                    | grafica_lineas_expandida:grafica  {: System.out.println("GRAFICA DE LINEAS EXPANDIDA"+ grafica.toString());:}
                     ;
 
-grafica_lineas_simple ::= NAME DOS_PUNTOS CADENA COMA POINTS DOS_PUNTOS CORCHETE_A
-                            LLAVE_A X DOS_PUNTOS CONSTANTE COMA Y DOS_PUNTOS CONSTANTE LLAVE_C
-                             mas_coordenadas_simples CORCHETE_C LLAVE_C series_simples CORCHETE_C COMA
+grafica_lineas_simple ::= NAME DOS_PUNTOS CADENA:nombreSerie COMA POINTS DOS_PUNTOS CORCHETE_A
+                            LLAVE_A X DOS_PUNTOS CONSTANTE:x COMA Y DOS_PUNTOS CONSTANTE:y  LLAVE_C {:  coordenadas.add(new DatosGraficaPuntos(Integer.parseInt(x.toString()),Integer.parseInt(y.toString()),null,null));   :}
+                             mas_coordenadas_simples CORCHETE_C LLAVE_C {: series.add(new Serie(nombreSerie.toString() , null,new ArrayList<>(coordenadas),null,null)); coordenadas.clear();  :} series_simples CORCHETE_C COMA
                              CHART DOS_PUNTOS LLAVE_A
-                                TITLE DOS_PUNTOS CADENA COMA
-                                X_AXIS_LABEL DOS_PUNTOS CADENA COMA
-                                Y_AXIS_LABEL DOS_PUNTOS CADENA LLAVE_C LLAVE_C
+                                TITLE DOS_PUNTOS CADENA:title COMA
+                                X_AXIS_LABEL DOS_PUNTOS CADENA:xlabel COMA
+                                Y_AXIS_LABEL DOS_PUNTOS CADENA:ylabel LLAVE_C LLAVE_C
+                                {:RESULT= new GraficaLineas(true,new ArrayList<>(series), title.toString(), xlabel.toString(),ylabel.toString(),null,null,null     ); series.clear(); coordenadas.clear(); :}
 
 
 ;
 
-series_simples ::= COMA LLAVE_A NAME DOS_PUNTOS CADENA COMA POINTS DOS_PUNTOS CORCHETE_A
-                    LLAVE_A X DOS_PUNTOS CONSTANTE COMA Y DOS_PUNTOS CONSTANTE LLAVE_C
-                    mas_coordenadas_simples CORCHETE_C LLAVE_C series_simples
+series_simples ::= COMA LLAVE_A NAME DOS_PUNTOS CADENA:nombreSerie COMA POINTS DOS_PUNTOS CORCHETE_A
+                    LLAVE_A X DOS_PUNTOS CONSTANTE:x COMA Y DOS_PUNTOS CONSTANTE:y LLAVE_C {: coordenadas.add(new DatosGraficaPuntos(Integer.parseInt(x.toString()),Integer.parseInt(y.toString()),null,null));  :}
+                    mas_coordenadas_simples CORCHETE_C LLAVE_C  {: series.add(new Serie(nombreSerie.toString() , null,new ArrayList<>(coordenadas),null,null)); coordenadas.clear();  :} series_simples
                     | /*vacio*/
 ;
 
 
-grafica_lineas_expandida ::= NAME DOS_PUNTOS CADENA COMA POINTS DOS_PUNTOS CORCHETE_A
-                            LLAVE_A X DOS_PUNTOS CONSTANTE COMA Y DOS_PUNTOS CONSTANTE COMA LABEL DOS_PUNTOS CADENA LLAVE_C mas_coordenadas_label CORCHETE_C COMA
-                            COLOR DOS_PUNTOS HEXADECIMAL COMA LINE_STYLE DOS_PUNTOS CADENA LLAVE_C series_expandidas CORCHETE_C COMA
+grafica_lineas_expandida ::= NAME DOS_PUNTOS CADENA:nombreSerie COMA POINTS DOS_PUNTOS CORCHETE_A
+                            LLAVE_A X DOS_PUNTOS CONSTANTE:x COMA Y DOS_PUNTOS CONSTANTE:y COMA LABEL DOS_PUNTOS CADENA:label LLAVE_C  {: puntosSeries.add(new PuntosSeries(Integer.parseInt(x.toString()),Integer.parseInt(y.toString()),label.toString())); :} mas_coordenadas_label CORCHETE_C COMA
+                            COLOR DOS_PUNTOS HEXADECIMAL:color COMA LINE_STYLE DOS_PUNTOS CADENA:lineStyle LLAVE_C {: series.add(new Serie(nombreSerie.toString(), new ArrayList<>(puntosSeries),null,color.toString(),lineStyle.toString()) );   puntosSeries.clear(); :}   series_expandidas CORCHETE_C COMA
                             CHART DOS_PUNTOS LLAVE_A
-                            TITLE DOS_PUNTOS CADENA COMA
-                            X_AXIS_LABEL DOS_PUNTOS CADENA COMA
-                            Y_AXIS_LABEL DOS_PUNTOS CADENA LLAVE_C LLAVE_C
+                            TITLE DOS_PUNTOS CADENA:title COMA
+                            X_AXIS_LABEL DOS_PUNTOS CADENA:xlabel COMA
+                            Y_AXIS_LABEL DOS_PUNTOS CADENA:ylabel LLAVE_C LLAVE_C
+                            {: RESULT = new GraficaLineas(false, new ArrayList<>(series), title.toString(),xlabel.toString(),ylabel.toString(),null,null,null );  puntosSeries.clear(); series.clear();  :}
 
 
 
 ;
 
-mas_coordenadas_label ::=  COMA LLAVE_A X DOS_PUNTOS CONSTANTE COMA Y DOS_PUNTOS CONSTANTE COMA LABEL DOS_PUNTOS CADENA LLAVE_C mas_coordenadas_label
+mas_coordenadas_label ::=  COMA LLAVE_A X DOS_PUNTOS CONSTANTE:x COMA Y DOS_PUNTOS CONSTANTE:y COMA LABEL DOS_PUNTOS CADENA:label LLAVE_C {: puntosSeries.add(new PuntosSeries(Integer.parseInt(x.toString()),Integer.parseInt(y.toString()),label.toString())); :} mas_coordenadas_label
                             | /*vacio*/
 
 
 ;
 
-series_expandidas ::= COMA LLAVE_A NAME DOS_PUNTOS CADENA COMA POINTS DOS_PUNTOS CORCHETE_A
-                       LLAVE_A X DOS_PUNTOS CONSTANTE COMA Y DOS_PUNTOS CONSTANTE COMA LABEL DOS_PUNTOS CADENA LLAVE_C mas_coordenadas_label CORCHETE_C COMA
-                       COLOR DOS_PUNTOS HEXADECIMAL COMA LINE_STYLE DOS_PUNTOS CADENA LLAVE_C
+series_expandidas ::= COMA LLAVE_A NAME DOS_PUNTOS CADENA:nombreSerie COMA POINTS DOS_PUNTOS CORCHETE_A
+                       LLAVE_A X DOS_PUNTOS CONSTANTE:x COMA Y DOS_PUNTOS CONSTANTE:y COMA LABEL DOS_PUNTOS CADENA:label LLAVE_C {: puntosSeries.add(new PuntosSeries(Integer.parseInt(x.toString()),Integer.parseInt(y.toString()),label.toString())); :} mas_coordenadas_label CORCHETE_C COMA
+                       COLOR DOS_PUNTOS HEXADECIMAL:color COMA LINE_STYLE DOS_PUNTOS CADENA:lineStyle  {: series.add(new Serie(nombreSerie.toString(), new ArrayList<>(puntosSeries),null,color.toString(),lineStyle.toString()) );   puntosSeries.clear(); :}  LLAVE_C series_expandidas
+                        | /*vacio*/
 
 
 
 ;
 
-tarjeta_informacion ::=  tarjeta_informacion_simple     {: System.out.println("TARJETA INFORMACION SIMPLE"); :}
-                        | tarjeta_informacion_extendida {: System.out.println("TARJETA DE INFORMACION EXPANDIDA"); :}
+tarjeta_informacion ::=  tarjeta_informacion_simple:tarjeta    {: System.out.println("TARJETA INFORMACION SIMPLE"+tarjeta.toString()); :}
+                        | tarjeta_informacion_extendida:tarjeta         {: System.out.println("TARJETA DE INFORMACION EXPANDIDA" +tarjeta.toString()); :}
 ;
 
 
-tarjeta_informacion_simple ::= VALUE DOS_PUNTOS CONSTANTE COMA
-                                LABEL DOS_PUNTOS CADENA COMA
-                                DESCRIPTION DOS_PUNTOS CADENA LLAVE_C LLAVE_C
+tarjeta_informacion_simple ::= VALUE DOS_PUNTOS CONSTANTE:value COMA
+                                LABEL DOS_PUNTOS CADENA:label COMA
+                                DESCRIPTION DOS_PUNTOS CADENA:descripcion LLAVE_C LLAVE_C
+                                {:  RESULT=new TarjetaInformacion(value.toString(),label.toString(), descripcion.toString(),null,null,null      ); :}
 
 ;
-tarjeta_informacion_extendida ::= VALUE DOS_PUNTOS CONSTANTE COMA
-                                  LABEL DOS_PUNTOS CADENA COMA
-                                  DESCRIPTION DOS_PUNTOS CADENA COMA
-                                  ICON DOS_PUNTOS CADENA COMA
-                                  COLOR DOS_PUNTOS HEXADECIMAL COMA
-                                  LINK DOS_PUNTOS CADENA LLAVE_C LLAVE_C
+tarjeta_informacion_extendida ::= VALUE DOS_PUNTOS CONSTANTE:value COMA
+                                  LABEL DOS_PUNTOS CADENA:label COMA
+                                  DESCRIPTION DOS_PUNTOS CADENA:descripcion COMA
+                                  ICON DOS_PUNTOS CADENA:icon COMA
+                                  COLOR DOS_PUNTOS HEXADECIMAL:color COMA
+                                  LINK DOS_PUNTOS CADENA:link LLAVE_C LLAVE_C
+                     {:  RESULT=new TarjetaInformacion(value.toString(),label.toString(), descripcion.toString(),icon.toString(),color.toString(),link.toString()      ); :}
+
+
 ;
 
 
@@ -352,7 +381,6 @@ asignacion_operacion_id ::= asigancion                                          
 
 asigancion ::= IDENTIFICADOR:id IGUAL valor:val PUNTO_COMA {:
                                                                 if(!existeVariable(id.toString())){
-
                                                                 Variable variable=(Variable) val; tablaSimbolos.add(new TablaSImbolos(variable.getTipoVariable(),id.toString(),(String) variable.getValor() ));
                                                                 }else{
                                                                 System.out.println("YA EXISTE LA VARIABLE");

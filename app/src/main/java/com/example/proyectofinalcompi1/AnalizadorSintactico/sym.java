@@ -26,7 +26,7 @@ public class sym {
   public static final int LLAVE_A = 40;
   public static final int FOR = 31;
   public static final int BACKGROUND_COLOR = 7;
-  public static final int CONSTANTE = 56;
+  public static final int CONSTANTE = 60;
   public static final int Y_AXIS_LABEL = 16;
   public static final int DATA = 10;
   public static final int IDENTIFICADOR = 54;
@@ -38,12 +38,12 @@ public class sym {
   public static final int PUNTO_COMA = 36;
   public static final int EOF = 0;
   public static final int LINK = 28;
-  public static final int TRUE = 59;
+  public static final int TRUE = 58;
   public static final int SIZE = 20;
-  public static final int COMILLA = 57;
+  public static final int COMILLA = 56;
   public static final int error = 1;
   public static final int COMA = 35;
-  public static final int CADENA = 58;
+  public static final int CADENA = 57;
   public static final int MENOS = 53;
   public static final int MAYOR_QUE = 51;
   public static final int ICON = 27;
@@ -65,7 +65,7 @@ public class sym {
   public static final int MENOR_QUE = 50;
   public static final int VALUE = 12;
   public static final int MENOR_IGUAL = 45;
-  public static final int FALSE = 60;
+  public static final int FALSE = 59;
   public static final int LABEL = 26;
   public static final int DO = 33;
   public static final int MAS = 52;
@@ -126,11 +126,11 @@ public class sym {
   "MENOS",
   "IDENTIFICADOR",
   "HEXADECIMAL",
-  "CONSTANTE",
   "COMILLA",
   "CADENA",
   "TRUE",
-  "FALSE"
+  "FALSE",
+  "CONSTANTE"
   };
 }
 
