@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
+
 }
 
 android {
@@ -26,6 +27,14 @@ android {
             )
         }
     }
+
+    buildFeatures{
+        viewBinding=true;
+
+
+
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
@@ -37,6 +46,7 @@ android {
 
 dependencies {
 
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
@@ -45,6 +55,9 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+    implementation("org.quanqi:android-holo-graph:0.1.0")
+    implementation ("com.github.PhilJay:MPAndroidChart:v3.1.0")
     //https://mvnrepository.com/artifact/de.jflex/cup_runtime
     implementation("de.jflex:cup_runtime:11b-20160615")
+
 }

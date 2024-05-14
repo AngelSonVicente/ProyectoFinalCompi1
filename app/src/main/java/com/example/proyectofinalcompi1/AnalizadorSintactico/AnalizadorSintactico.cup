@@ -439,6 +439,7 @@ tarjeta_informacion_extendida ::= VALUE DOS_PUNTOS CONSTANTE:value COMA
 asignacion_operacion_id ::= asigancion                                              {:System.out.println("Asignacion");:}
                           | IDENTIFICADOR asignacion_compuesta valor PUNTO_COMA     {:System.out.println("Asignacion Compuesta");:}
                           | incremento_decremento PUNTO_COMA                        {:System.out.println("incremente o decremento");:}
+                          | incremento_decremento PUNTO_COMA                        {:System.out.println("incremente o decremento");:}
 
 
                             ;
@@ -614,6 +615,7 @@ condicional_for ::= IDENTIFICADOR:val1 MENOR_IGUAL constate_identificador:val2  
 
 
 condicion ::= booolean:b                                                 {: RESULT=b;:}
+            | CONSTANTE:val1 comparador:comp CONSTANTE:val2               {:RESULT=new Condicional(val1.toString(),(Comparador) comp,val2.toString());:}
             | IDENTIFICADOR:val1 comparador:comp IDENTIFICADOR:val2      {:RESULT=new Condicional(val1.toString(),(Comparador) comp,val2.toString());:}
             | IDENTIFICADOR:val1 comparador:comp CONSTANTE:val2           {:RESULT=new Condicional(val1.toString(),(Comparador) comp,val2.toString());:}
             | IDENTIFICADOR:val1 IGUAL_IGUAL booolean:val2               {:RESULT=new Condicional(val1.toString(),Comparador.IGUAL_IGUAL,val2.toString());:}
