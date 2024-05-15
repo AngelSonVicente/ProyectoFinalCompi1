@@ -57,6 +57,7 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
     implementation("org.quanqi:android-holo-graph:0.1.0")
     implementation ("com.github.PhilJay:MPAndroidChart:v3.1.0")
+
     //https://mvnrepository.com/artifact/de.jflex/cup_runtime
     implementation("de.jflex:cup_runtime:11b-20160615")
 

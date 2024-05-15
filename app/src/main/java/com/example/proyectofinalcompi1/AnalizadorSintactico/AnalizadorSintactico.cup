@@ -45,6 +45,9 @@ private List<PuntosSeries> puntosSeries= new ArrayList<>();
 private List<Accion>  accionList = new ArrayList<>();
 
 
+public String getErrores(){
+return Errores;
+}
 
 
 public List<TablaSImbolos> getTablaSimbolos(){
@@ -104,7 +107,7 @@ non terminal   inicio, campos, lista_campos, grafica, grafica_barras, grafica_ba
                condicion, booolean, comparador, bucle_for, condicional_for, constate_identificador, incremento_decremento, bucle_while,
                bucle_do_while, codigo, asignaciones, graficas, contenido, operaciones, estructura_control, estructuras_control,
                operador_artimetico, asignacion_compuesta, asignacion_operacion, asignacion_operacion_id, lista_instrucciones, instruccion,
-               lista_instrucciones2
+               lista_instrucciones2, recuperarse, recuperar, accion
 
 
 
@@ -122,7 +125,25 @@ non terminal   inicio, campos, lista_campos, grafica, grafica_barras, grafica_ba
 
 
 
-start with inicio;
+start with accion;
+
+recuperarse::=error recuperar
+
+;
+
+recuperar ::= LLAVE_A
+            | LLAVE_C
+            | CORCHETE_A
+            | CORCHETE_C
+
+;
+
+
+accion::=inicio |
+         | recuperarse
+
+;
+
 
 inicio ::= LLAVE_A
            TITLE DOS_PUNTOS CADENA COMA
@@ -438,8 +459,8 @@ tarjeta_informacion_extendida ::= VALUE DOS_PUNTOS CONSTANTE:value COMA
 
 asignacion_operacion_id ::= asigancion                                              {:System.out.println("Asignacion");:}
                           | IDENTIFICADOR asignacion_compuesta valor PUNTO_COMA     {:System.out.println("Asignacion Compuesta");:}
-                          | incremento_decremento PUNTO_COMA                        {:System.out.println("incremente o decremento");:}
-                          | incremento_decremento PUNTO_COMA                        {:System.out.println("incremente o decremento");:}
+                          | IDENTIFICADOR MAS MAS PUNTO_COMA                        {:System.out.println("incremente o decremento");:}
+                          | IDENTIFICADOR MENOS MENOS PUNTO_COMA                        {:System.out.println("incremente o decremento");:}
 
 
                             ;

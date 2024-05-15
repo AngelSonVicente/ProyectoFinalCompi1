@@ -7,6 +7,17 @@
     android:layout_height="match_parent"
     tools:context=".PrincipalActivity" >
 
+    <ActionMenuView
+
+
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+
+
+        tools:ignore="MissingConstraints" />
+
+
+
 
     <androidx.appcompat.widget.AppCompatEditText
 
@@ -14,6 +25,7 @@
         android:layout_width="390dp"
         android:layout_height="580dp"
         android:background="@color/design_default_color_on_secondary"
+
 
 
 
@@ -66,6 +78,27 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.02" />
+
+
+    <Button
+        android:id="@+id/buttonVerG"
+        android:layout_width="112dp"
+        android:layout_height="51dp"
+        android:text="ExportarPNG
+"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
+        android:id="@+id/buttonExportarW"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="48dp"
+        android:layout_marginBottom="176dp"
+        android:text="VerEnLaWeb"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
 
 
 
