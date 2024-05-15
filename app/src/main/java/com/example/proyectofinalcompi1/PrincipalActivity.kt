@@ -1,20 +1,31 @@
 package com.example.proyectofinalcompi1
 
-import abrirArchivo.CreadorCarpetas
-import abrirArchivo.CrearGrafico
+import CrearGraficas.CrearGraficoBarras
+import CrearGraficas.CrearGraficoPastel
 import abrirArchivos.AbrirArchivo
 import android.annotation.SuppressLint
+import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.graphics.Canvas
 import android.graphics.Color
+import android.graphics.pdf.PdfDocument
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.os.StrictMode
+import android.print.PrintAttributes
+import android.print.pdf.PrintedPdfDocument
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Log
 import android.view.View
+import android.webkit.WebView
 import android.widget.Button
+import android.widget.EditText
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
@@ -24,31 +35,34 @@ import androidx.appcompat.widget.AppCompatEditText
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import androidx.drawerlayout.widget.DrawerLayout
-import com.echo.holographlibrary.Bar
-import com.echo.holographlibrary.BarGraph
 import com.example.proyectofinalcompi1.AnalizadorLexico.analizadorLexico
 import com.example.proyectofinalcompi1.AnalizadorSintactico.AnalizadorSintactico
 import com.example.proyectofinalcompi1.Interprete.Graficar
 import com.example.proyectofinalcompi1.Interprete.InterpreteGraficadora
 import com.example.proyectofinalcompi1.Model.Accion
-import com.example.proyectofinalcompi1.Model.Grafica
-import com.example.proyectofinalcompi1.databinding.ActivityPrincipalBinding
 import com.github.mikephil.charting.charts.BarChart
+import com.github.mikephil.charting.charts.PieChart
 import com.github.mikephil.charting.data.BarData
 import com.github.mikephil.charting.data.BarDataSet
 import com.github.mikephil.charting.data.BarEntry
+import com.github.mikephil.charting.data.PieData
+import com.github.mikephil.charting.data.PieDataSet
+import com.github.mikephil.charting.data.PieEntry
 import com.github.mikephil.charting.utils.ColorTemplate
 import com.google.android.material.navigation.NavigationView
 import com.google.android.material.snackbar.Snackbar
 import java.io.File
+
+
 import java.io.FileOutputStream
 import java.io.IOException
+import java.io.OutputStream
 import java.io.StringReader
 
 class PrincipalActivity : AppCompatActivity() {
+
+
 
     private val Interprete = InterpreteGraficadora()
     private val graficadora = Graficar()
@@ -66,6 +80,8 @@ class PrincipalActivity : AppCompatActivity() {
 
 
 
+    private lateinit var textViewLineNumber: TextView
+    private lateinit var editText: EditText
 
     @SuppressLint("MissingInflatedId", "WrongThread")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -74,8 +90,31 @@ class PrincipalActivity : AppCompatActivity() {
         setContentView(R.layout.activity_principal)
 
 
-        val rootView = findViewById<View>(android.R.id.content)
-        verificarPermisos(rootView)
+            textViewLineNumber = findViewById(R.id.editText)
+            editText = findViewById(R.id.contenidoUsuario)
+
+            // Agregar un listener para detectar cambios en el texto del EditText
+            editText.addTextChangedListener(object : TextWatcher {
+                override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+                    // No es necesario hacer nada antes de que cambie el texto
+                }
+
+                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                    // No es necesario hacer nada mientras cambia el texto
+                }
+
+                override fun afterTextChanged(s: Editable?) {
+                    // Actualizar el número de línea
+                    updateLineAndColumnNumber()
+                }
+            })
+
+
+
+
+
+
+
 
 
 
@@ -124,7 +163,14 @@ class PrincipalActivity : AppCompatActivity() {
 
 
 
-        val butonn =  findViewById<Button>(R.id.buttonVerG)
+        val butonn =  findViewById<Button>(R.id.crearArchivo)
+
+
+
+
+///exportar la grafica
+
+
         /*
                         lateinit var barlist: ArrayList<BarEntry>
                         lateinit var barDataSet: BarDataSet
@@ -148,27 +194,22 @@ class PrincipalActivity : AppCompatActivity() {
                         barChart.data = barData
                         barDataSet.setColors(ColorTemplate.JOYFUL_COLORS,250)
 
-        butonn.setOnClickListener{view->
-            val CrearGrafico = CrearGrafico(barChart, this)
-            CrearGrafico.saveChartToGallery()
-        }
+
 
 */
-
-
-
-
-///exportar la grafica
-
-
 // Obtener el directorio de archivos de la aplicación interna
 
+        butonn.setOnClickListener{view->
+
+            crearArchivohg(" ArchivoNuevo", this, applicationContext)
+
+
+        }
 
 
 
 
-
-        val contenido = findViewById<AppCompatEditText>(R.id.contenidoUsuario)
+        val contenido = findViewById<EditText>(R.id.contenidoUsuario)
 
         val btnAnalizar = findViewById<AppCompatButton>(R.id.analizar)
 
@@ -317,6 +358,12 @@ class PrincipalActivity : AppCompatActivity() {
 
 
     private fun crearArchivoTXT(texto: String, nombreArchivo: String ) {
+
+
+        graficarPNG()
+
+
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             val context = applicationContext
             val archivo = File(context.getExternalFilesDir(null), "$nombreArchivo.html")
@@ -349,6 +396,8 @@ class PrincipalActivity : AppCompatActivity() {
             }
         }
     }
+
+
 
 
     private val requestPermissionLauncher = registerForActivityResult(
@@ -429,9 +478,179 @@ class PrincipalActivity : AppCompatActivity() {
 
 
 
+    fun graficarPNG(){
+
+        listaAccionesEncontradas?.forEach { accion ->
+
+            var i:Int=0
+
+            i++
+            when {
+
+                accion.graficaBarras!=null ->{
+
+                    lateinit var barlist: ArrayList<BarEntry>
+                    lateinit var barDataSet: BarDataSet
+                    lateinit var barData: BarData
+
+                    val barChart = findViewById<BarChart>(R.id.grafiquita) as BarChart
+
+
+
+
+                    barlist= ArrayList()
+
+
+                    accion.graficaBarras.datos.forEach { dato ->
+                        barlist.add(BarEntry(dato.value.toFloat(),dato.value.toFloat()))
+
+                    }
+
+
+
+                    barDataSet = BarDataSet(barlist,"Datos")
+                    barData = BarData(barDataSet)
+
+                    barChart.data = barData
+                    barDataSet.setColors(ColorTemplate.JOYFUL_COLORS,250)
+
+                    val CrearGrafico = CrearGraficoBarras(barChart, this)
+                    CrearGrafico.saveChartToGallery("Grafica$i")
+
+
+
+
+
+
+                }
+
+                accion.graficaPastel!=null ->{
+
+                    lateinit var PieEntries: ArrayList<PieEntry>
+
+                     PieEntries = ArrayList()
+
+                    accion.graficaPastel.datos.forEach { dato ->
+                        PieEntries.add(PieEntry(dato.value.toFloat()))
+
+                    }
+
+                    // Crear un conjunto de datos para el gráfico de pastel
+                    val dataSet = PieDataSet(PieEntries, "Datos de ejemplo")
+                    dataSet.colors = listOf(Color.RED, Color.GREEN, Color.BLUE)
+
+                    // Crear el gráfico de pastel
+                    val pieChart = findViewById<PieChart>(R.id.pieChart)
+                    pieChart.setUsePercentValues(true)
+                    pieChart.description.isEnabled = false
+
+                    // Crear un objeto PieData y establecer el conjunto de datos
+                    val pieData = PieData(dataSet)
+                    pieChart.data = pieData
+
+
+                    val CrearGrafico = CrearGraficoPastel(pieChart, this)
+                    CrearGrafico.saveChartToGallery("GraficaPastel$i")
+
+
+
+
+
+
+                }
+
+
+            }
+
+
+
+
+        }
 
 
     }
+
+
+
+
+      val REQUEST_CODE_SELECT_DIRECTORY = 123
+
+    private fun crearArchivohg( nombreArchivo: String, activity: Activity, context: Context) {
+
+
+        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE)
+        intent.addCategory(Intent.CATEGORY_DEFAULT)
+        try {
+            activity.startActivityForResult(Intent.createChooser(intent, "Selecciona una carpeta"), REQUEST_CODE_SELECT_DIRECTORY)
+        } catch (e: Exception) {
+            Toast.makeText(context, "Error al abrir el selector de directorios", Toast.LENGTH_SHORT).show()
+            e.printStackTrace()
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == REQUEST_CODE_SELECT_DIRECTORY && resultCode == Activity.RESULT_OK) {
+            data?.data?.let { uri ->
+                val rutaSeleccionada = File(uri.path ?: "")
+                val textoHTML = "Contenido del archivo HTML"
+
+                if (rutaSeleccionada.isDirectory) {
+                    val nombreArchivo = "nombre_archivo"
+                    val archivo = File(rutaSeleccionada, "$nombreArchivo.html")
+
+                    try {
+                        if (!archivo.exists()) {
+                            archivo.createNewFile()
+                            Toast.makeText(this, "ARCHIVO HTML CREADO", Toast.LENGTH_SHORT).show()
+                        } else {
+                            Toast.makeText(this, "Archivo HTML CREADO", Toast.LENGTH_SHORT).show()
+                        }
+                        archivo.writeText(textoHTML) // Escribir el texto en el archivo
+                    } catch (e: IOException) {
+                        Toast.makeText(this, "Error al crear el archivo HTML", Toast.LENGTH_SHORT).show()
+                        e.printStackTrace()
+                    }
+                }
+            }
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+    private fun updateLineAndColumnNumber() {
+        // Calcular el número de línea y columna en el EditText
+        val lineNumber = editText.layout.getLineForOffset(editText.selectionStart) + 1
+        val columnNumber = editText.selectionStart - editText.layout.getLineStart(lineNumber - 1) + 1
+
+        // Formatear el número de línea y columna como una cadena
+        val lineAndColumnText = "Linea: $lineNumber , Col: $columnNumber"
+
+        // Actualizar el TextView con el número de línea y columna formateado
+        textViewLineNumber.text = lineAndColumnText
+    }
+
+
+
+
+
+
+
+
+
+    }
+
+
+
+
+
 
 
 

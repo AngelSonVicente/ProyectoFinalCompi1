@@ -1,4 +1,4 @@
-package abrirArchivo
+package CrearGraficas
 
 import android.graphics.Bitmap
 import android.graphics.Canvas
@@ -7,15 +7,14 @@ import android.util.Log
 import android.widget.Toast
 import com.example.proyectofinalcompi1.PrincipalActivity
 import com.github.mikephil.charting.charts.BarChart
-import java.io.IOException
+import com.github.mikephil.charting.charts.ScatterChart
 import java.io.File
 import java.io.FileOutputStream
+import java.io.IOException
 
+class CrearGraficoPuntos(val chart: ScatterChart, val ac: PrincipalActivity) {
 
-
-class CrearGrafico (val chart: BarChart, val ac: PrincipalActivity){
-
-    public fun saveChartToGallery() {
+    public fun saveChartToGallery(nombre:String) {
         // Crear un bitmap de la gráfica
         val bitmap = Bitmap.createBitmap(chart.width, chart.height, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
@@ -23,7 +22,7 @@ class CrearGrafico (val chart: BarChart, val ac: PrincipalActivity){
 
         // Guardar el bitmap en la galería
 
-        val file = File(ac.getExternalFilesDir(Environment.DIRECTORY_PICTURES), "chart.png")
+        val file = File(ac.getExternalFilesDir(Environment.DIRECTORY_PICTURES), "$nombre.png")
         Log.i("", file.absolutePath)
         try {
             FileOutputStream(file).use { fos ->
@@ -35,6 +34,7 @@ class CrearGrafico (val chart: BarChart, val ac: PrincipalActivity){
             Toast.makeText(ac, "Error al guardar el gráfico", Toast.LENGTH_SHORT).show()
         }
     }
+
 
 
 }

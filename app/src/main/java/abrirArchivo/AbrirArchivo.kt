@@ -26,7 +26,7 @@ class AbrirArchivo (private val actividad: PrincipalActivity) {
     public fun seleccionarArchivo() {
         val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
         intent.addCategory(Intent.CATEGORY_OPENABLE)
-        intent.type = "text/plain"
+        intent.type = "gh/plain"
         seleccionarArchivoLauncher.launch(intent)
     }
 
@@ -41,8 +41,8 @@ class AbrirArchivo (private val actividad: PrincipalActivity) {
                 stringBuilder.append("\n")
             }
             inputStream?.close()
-            val editText = actividad.findViewById<EditText>(R.id.contenidoUsuario)
-            editText.setText(stringBuilder.toString())
+
+
         } catch (e: Exception) {
             Toast.makeText(actividad, "Error al leer el archivo", Toast.LENGTH_SHORT).show()
             e.printStackTrace()
