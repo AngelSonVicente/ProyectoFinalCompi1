@@ -95,8 +95,12 @@ class Graficar {
             */
 
 
-            contenido.append(" var ctx = document.getElementById('grafica${i}').getContext('2d');")
-            contenido.append(" var data={\n ")
+
+            if(accion.tarjetaInformacion==null){
+
+                contenido.append(" var ctx = document.getElementById('grafica${i}').getContext('2d');")
+                contenido.append(" var data={\n ")
+            }
 
 
 
@@ -614,6 +618,31 @@ class Graficar {
 
 
                     }
+
+                }
+
+
+                accion.tarjetaInformacion!=null ->{
+
+                    contenido.append("          const canvas$i = document.getElementById('grafica$i');\n" +
+                            "        const ctx$i = canvas$i.getContext('2d');\n" +
+                            "\n" +
+                            "             // Dibuja el contorno de la tarjeta\n" +
+                            "            ctx$i.strokeStyle = '#000';\n" +
+                            "            ctx$i.strokeRect(20, 20, 700, 300);\n" +
+                            "\n" +
+                            "            // Dibuja el título de la tarjeta\n" +
+                            "         ctx$i.font = 'bold 16px Arial';\n" +
+                            "            ctx$i.fillText('Value: ${accion.tarjetaInformacion.value} ', 50, 60);\n" +
+                            "\n" +
+                            "            // Dibuja el contenido de la tarjeta\n" +
+                            "            ctx$i.font = '14px Arial';\n" +
+                            "            ctx$i.fillText('Label: ${accion.tarjetaInformacion.label}', 60, 120);\n" +
+                            "            ctx$i.fillText('Descripcion ${accion.tarjetaInformacion.descripcion}', 60, 180);\n" +
+                            "\n" +
+                            "            ctx$i.fillText('link: ${accion.tarjetaInformacion.link}', 60, 260);")
+
+
 
                 }
 
