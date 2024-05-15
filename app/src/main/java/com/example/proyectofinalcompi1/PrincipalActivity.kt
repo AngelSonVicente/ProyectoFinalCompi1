@@ -36,6 +36,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.drawerlayout.widget.DrawerLayout
+import com.example.proyectofinalcompi1.AnalizadorLexico.Identador
 import com.example.proyectofinalcompi1.AnalizadorLexico.analizadorLexico
 import com.example.proyectofinalcompi1.AnalizadorSintactico.AnalizadorSintactico
 import com.example.proyectofinalcompi1.Interprete.Graficar
@@ -58,6 +59,7 @@ import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 import java.io.OutputStream
+import java.io.Reader
 import java.io.StringReader
 
 class PrincipalActivity : AppCompatActivity() {
@@ -218,6 +220,22 @@ class PrincipalActivity : AppCompatActivity() {
         btnAnalizar.setOnClickListener{
 
             Log.i("AngelAPP","Contenido: ${contenido.text.toString()} ")
+
+            val reader: Reader = StringReader(contenido.text.toString())
+
+            val identador = Identador(reader)
+
+
+            while(!identador.yyatEOF()){
+                identador.yylex()
+            }
+            val contenidoIdentado=identador.string
+
+
+            
+
+
+            contenido.setText(contenidoIdentado)
 
 
             compile(contenido.text.toString());

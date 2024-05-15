@@ -1,6 +1,6 @@
-package com.example.proyectofinalcompi1.AnalizadorLexico;
+package AnalizadorLexico;
 
-
+import java.util;
 
 %% //separador de area
 
@@ -28,14 +28,14 @@ WhiteSpace = {LineTerminator} | [ \t\f]
     String identation;
     int identacionActual;
 
-    public String getString(){
-        return this.string.toString();
-    }
+      public StringBuffer getString(){
+           return this.string;
+       }
 
     private String identar(int times){
-   String codigo = "";
+        String codigo = "";
         for(int index = 0; index < times; index++){
-            codigo += identation;
+            code += identation;
         }
         return codigo;
     }
